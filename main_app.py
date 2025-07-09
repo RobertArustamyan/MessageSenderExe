@@ -368,7 +368,8 @@ class AutoAmApp:
                 self.queue.put(("log", "Extracting cookies..."))
                 self.queue.put(("status", "Extracting cookies..."))
 
-                extractor = CookieExtractor(headless=cookie_headless, additional_options=True, login=login, password=password)
+                extractor = CookieExtractor(headless=cookie_headless, additional_options=True, login=login,
+                                            password=password)
                 success = extractor.extract_cookies()
 
                 if success:
@@ -382,7 +383,13 @@ class AutoAmApp:
             self.queue.put(("log", "Starting message sending..."))
             self.queue.put(("status", "Sending messages..."))
 
-            sender = Sender(headless=sender_headless, additional_options=True)
+            # Create a custom Sender class that can communicate with the GUI
+            sender = CustomSender(
+                headless=sender_headless,
+                additional_options=True,
+                progress_callback=self.update_progress
+            )
+
             sender.send_message(
                 cookies_path="cookies.pkl",
                 category=category,
@@ -395,7 +402,6 @@ class AutoAmApp:
                 test_mode=test_mode,
             )
 
-
             self.queue.put(("log", "Process completed successfully!"))
             self.queue.put(("status", "Completed"))
             self.queue.put(("complete", "Process completed successfully"))
@@ -403,6 +409,12 @@ class AutoAmApp:
         except Exception as e:
             self.queue.put(("log", f"Error: {str(e)}"))
             self.queue.put(("error", f"Process failed: {str(e)}"))
+
+    def update_progress(self, message, status=None):
+        """Callback function for progress updates"""
+        self.queue.put(("log", message))
+        if status:
+            self.queue.put(("status", status))
 
     def stop_process(self):
         """Stop the current process"""
@@ -439,6 +451,42 @@ class AutoAmApp:
 
         # Schedule next queue check
         self.root.after(100, self.process_queue)
+
+
+# Custom Sender class that can send progress updates to the GUI
+class CustomSender(Sender):
+    def __init__(self, headless=False, additional_options=False, config=None, progress_callback=None):
+        super().__init__(headless, additional_options, config)
+        self.progress_callback = progress_callback
+
+    def send_message(self, cookies_path, category="passenger", start_page=1, end_page=1, start_price="10000",
+                     end_price="150000", messages=None, send_to_all=True, test_mode=True):
+
+        if self.progress_callback:
+            self.progress_callback("Initializing browser and loading cookies...")
+
+        from driver_manager import DriverManager
+        import pickle
+        from page_load_handler import LoadPages, CustomParseAndMessage
+
+        with DriverManager(self.headless, self.additional_options) as driver:
+            driver.get('https://auto.am/')
+
+            with open(cookies_path, "rb") as cookies_file:
+                cookies = pickle.load(cookies_file)
+                for cookie in cookies:
+                    driver.add_cookie(cookie)
+
+            driver.refresh()
+
+            if self.progress_callback:
+                self.progress_callback("Loading pages...", "Loading pages...")
+
+            loader = LoadPages(driver, self.config, category, start_page, end_page, start_price, end_price)
+
+            # Use custom parser that can send progress updates
+            parser = CustomParseAndMessage(driver, self.config, loader.get_all_pages, self.progress_callback)
+            parser.send_messages(messages, send_to_all=send_to_all, test_mode=test_mode)
 
 
 def main():
