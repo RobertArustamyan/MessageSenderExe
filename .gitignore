@@ -1,0 +1,8 @@
+.env
+dist
+build
+.venv
+AutoAmSender.spec
+processed_numbers.txt
+messages_db.json
+cookies.pkl
