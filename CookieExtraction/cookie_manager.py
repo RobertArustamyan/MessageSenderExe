@@ -2,8 +2,8 @@ import pickle
 import time
 import logging
 from typing import List, Dict, Any
-from config import Config
-from exceptions import CookieExportError
+from Configurations.config import Config
+from Utils.exceptions import CookieExportError
 
 logger = logging.getLogger(__name__)
 

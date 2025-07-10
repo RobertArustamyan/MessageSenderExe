@@ -4,7 +4,7 @@ from selenium.common.exceptions import WebDriverException
 from dotenv import load_dotenv
 import logging
 from typing import Optional
-from exceptions import DriverInitializationError
+from Utils.exceptions import DriverInitializationError
 
 logger = logging.getLogger(__name__)
 

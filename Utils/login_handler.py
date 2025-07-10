@@ -4,8 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, WebDriverException
 import time
 import logging
-from config import Config
-from exceptions import LoginError
+from Configurations.config import Config
+from Utils.exceptions import LoginError
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,10 @@
 import logging
 from typing import Optional
-from config import Config
-from driver_manager import DriverManager
-from login_handler import LoginHandler
-from cookie_manager import CookieManager
-from exceptions import CookieExtractorError
+from Configurations.config import Config
+from Utils.driver_manager import DriverManager
+from Utils.login_handler import LoginHandler
+from CookieExtraction.cookie_manager import CookieManager
+from Utils.exceptions import CookieExtractorError
 
 logger = logging.getLogger(__name__)
 

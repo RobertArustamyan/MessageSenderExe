@@ -2,16 +2,15 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import json
 import os
-from typing import Dict, List
+from typing import List
 import threading
 import queue
 from datetime import datetime
 
 # Import your existing modules
-from cookie_extractor import CookieExtractor
-from message_sender import Sender
-from messages import Messages
-from config import Config
+from CookieExtraction.cookie_extractor import CookieExtractor
+from Messages.message_sender import Sender,CustomSender
+from Messages.messages import Messages
 
 
 class MessageDatabase:
@@ -391,7 +390,7 @@ class AutoAmApp:
             )
 
             sender.send_message(
-                cookies_path="cookies.pkl",
+                cookies_path="AppData/cookies.pkl",
                 category=category,
                 start_page=start_page,
                 end_page=end_page,
@@ -452,41 +451,6 @@ class AutoAmApp:
         # Schedule next queue check
         self.root.after(100, self.process_queue)
 
-
-# Custom Sender class that can send progress updates to the GUI
-class CustomSender(Sender):
-    def __init__(self, headless=False, additional_options=False, config=None, progress_callback=None):
-        super().__init__(headless, additional_options, config)
-        self.progress_callback = progress_callback
-
-    def send_message(self, cookies_path, category="passenger", start_page=1, end_page=1, start_price="10000",
-                     end_price="150000", messages=None, send_to_all=True, test_mode=True):
-
-        if self.progress_callback:
-            self.progress_callback("Initializing browser and loading cookies...")
-
-        from driver_manager import DriverManager
-        import pickle
-        from page_load_handler import LoadPages, CustomParseAndMessage
-
-        with DriverManager(self.headless, self.additional_options) as driver:
-            driver.get('https://auto.am/')
-
-            with open(cookies_path, "rb") as cookies_file:
-                cookies = pickle.load(cookies_file)
-                for cookie in cookies:
-                    driver.add_cookie(cookie)
-
-            driver.refresh()
-
-            if self.progress_callback:
-                self.progress_callback("Loading pages...", "Loading pages...")
-
-            loader = LoadPages(driver, self.config, category, start_page, end_page, start_price, end_price)
-
-            # Use custom parser that can send progress updates
-            parser = CustomParseAndMessage(driver, self.config, loader.get_all_pages, self.progress_callback)
-            parser.send_messages(messages, send_to_all=send_to_all, test_mode=test_mode)
 
 
 def main():
