@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 def load_processed_numbers():
     try:
-        with open('../processed_numbers.txt', 'r') as f:
+        with open('AppData/processed_numbers.txt', 'r') as f:
             return set(line.strip() for line in f)
     except FileNotFoundError:
         return set()
 
 def save_processed_number(number):
-    with open('../processed_numbers.txt', 'a') as f:
+    with open('AppData/processed_numbers.txt', 'a') as f:
         f.write(number + '\n')
 
 

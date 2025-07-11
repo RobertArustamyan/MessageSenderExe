@@ -25,7 +25,7 @@ class CustomParseAndMessage(ParseAndMessage):
                 processed = set()
                 logger.info("send_to_all=True, starting with empty processed set")
             else:
-                with open('../processed_numbers.txt', 'r') as f:
+                with open('AppData/processed_numbers.txt', 'r') as f:
                     processed = set(line.strip() for line in f)
                 logger.info(f"Loaded {len(processed)} processed numbers from file")
         except FileNotFoundError:
@@ -205,7 +205,7 @@ class CustomParseAndMessage(ParseAndMessage):
                 self.progress_callback("Saving processed numbers to file...")
 
             logger.info("Saving processed numbers to file")
-            with open('../processed_numbers.txt', 'w') as f:
+            with open('AppData/processed_numbers.txt', 'w') as f:
                 for number in processed:
                     f.write(number + '\n')
             logger.info(f"Successfully saved {len(processed)} processed numbers to file")
